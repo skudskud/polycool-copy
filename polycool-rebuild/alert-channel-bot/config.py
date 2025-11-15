@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     rate_limit_min_interval_seconds: int = int(os.getenv("RATE_LIMIT_MIN_INTERVAL_SECONDS", "5"))
     
     # Filtering Criteria (same as /smart_trading)
-    min_trade_value: float = float(os.getenv("MIN_TRADE_VALUE", "300.0"))
+    min_trade_value: float = float(os.getenv("MIN_TRADE_VALUE", "1000.0"))
     min_win_rate: float = float(os.getenv("MIN_WIN_RATE", "0.55"))
     max_age_minutes: int = int(os.getenv("MAX_AGE_MINUTES", "5"))
     
