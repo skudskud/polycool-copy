@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any, List
 from sqlalchemy import create_engine, text, select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql import JSONB
 
 from config import settings
 
@@ -219,8 +220,7 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                         AND t.trade_type = 'buy'
                         AND t.timestamp >= :cutoff_time
                         AND t.amount_usdc >= :min_trade_value
-                        AND t.outcome != 'UNKNOWN'  -- Filter out unknown outcomes
-                        AND m.title IS NOT NULL  -- Filter out trades without market title
+                        AND t.position_id IS NOT NULL  -- Must have position_id for resolution
                         AND NOT EXISTS (
                             SELECT 1 FROM alert_channel_sent acs WHERE acs.trade_id = t.tx_hash
                         )
@@ -235,13 +235,38 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
             )
             
             rows = result.fetchall()
+            
+            # ⚡ OPTIMIZATION: Batch resolve market titles and outcomes using position_id
+            # (Same approach as /smart_trading command)
+            position_ids = [row[2] for row in rows if row[2]]  # position_id is at index 2
+            market_title_map = {}
+            outcome_map = {}
+            
+            if position_ids:
+                # Resolve markets and outcomes from markets table using position_id
+                market_title_map, outcome_map = await _batch_resolve_markets_and_outcomes(position_ids)
+            
             trades = []
             for row in rows:
+                position_id = row[2]
+                
+                # Use resolved market title and outcome (like /smart_trading does)
+                resolved_market_title = market_title_map.get(position_id) if position_id else None
+                resolved_outcome = outcome_map.get(position_id, row[3]) if position_id else row[3]  # Fallback to DB value
+                
+                # Skip if still no market title after resolution
+                if not resolved_market_title:
+                    continue
+                
+                # Skip if outcome is still UNKNOWN after resolution
+                if resolved_outcome == 'UNKNOWN':
+                    continue
+                
                 trades.append({
                     "trade_id": row[0],
                     "market_id": row[1],
-                    "position_id": row[2],
-                    "outcome": row[3],
+                    "position_id": position_id,
+                    "outcome": resolved_outcome,  # Use resolved outcome
                     "side": row[4],
                     "amount": float(row[5]) if row[5] else None,
                     "price": float(row[6]) if row[6] else None,
@@ -251,10 +276,10 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                     "wallet_name": row[10],
                     "win_rate": float(row[11]) if row[11] else None,
                     "risk_score": float(row[12]) if row[12] else None,
-                    "market_title": row[13]
+                    "market_title": resolved_market_title  # Use resolved market title
                 })
             
-            logger.info(f"✅ Retrieved {len(trades)} qualified trades from database")
+            logger.info(f"✅ Retrieved {len(trades)} qualified trades from database (after resolution)")
             return trades
             
     except Exception as e:
