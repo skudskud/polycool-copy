@@ -205,8 +205,11 @@ def format_alert_message(trade_data: Dict[str, Any]) -> str:
             "Smart wallet just entered:\n"
         ]
         
-        # Add wallet address if available
-        if shortened_wallet:
+        # Add wallet address if available (with Polymarket profile link)
+        if shortened_wallet and wallet_address:
+            profile_url = f"https://polymarket.com/profile/{wallet_address}"
+            message_parts.append(f"👤 [{shortened_wallet}]({profile_url})\n")
+        elif shortened_wallet:
             message_parts.append(f"👤 {shortened_wallet}\n")
         
         # Win rate and smart score
