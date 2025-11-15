@@ -339,6 +339,11 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                     
                     # Find index of position_id in clob_token_ids array
                     try:
+                        # clob_token_ids is a JSONB array, convert to Python list if needed
+                        if isinstance(clob_token_ids, str):
+                            import json
+                            clob_token_ids = json.loads(clob_token_ids)
+                        
                         outcome_index = -1
                         for i, token_id in enumerate(clob_token_ids):
                             if str(token_id) == str(position_id):
@@ -348,8 +353,11 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                         if outcome_index >= 0 and outcome_index < len(outcomes):
                             market_title_map[position_id] = market_title
                             outcome_map[position_id] = outcomes[outcome_index]
+                            logger.debug(f"✅ Resolved: {position_id[:20]}... -> {market_title[:30]}... ({outcomes[outcome_index]})")
+                        else:
+                            logger.debug(f"⚠️ Could not find outcome index for {position_id[:20]}... (index: {outcome_index}, outcomes len: {len(outcomes)})")
                     except Exception as e:
-                        logger.debug(f"Error resolving outcome index for {position_id[:20]}...: {e}")
+                        logger.warning(f"Error resolving outcome index for {position_id[:20]}...: {e}")
                         continue
                         
                 except Exception as e:
