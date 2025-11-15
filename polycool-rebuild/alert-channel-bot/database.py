@@ -219,6 +219,8 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                         AND t.trade_type = 'buy'
                         AND t.timestamp >= :cutoff_time
                         AND t.amount_usdc >= :min_trade_value
+                        AND t.outcome != 'UNKNOWN'  -- Filter out unknown outcomes
+                        AND m.title IS NOT NULL  -- Filter out trades without market title
                         AND NOT EXISTS (
                             SELECT 1 FROM alert_channel_sent acs WHERE acs.trade_id = t.tx_hash
                         )

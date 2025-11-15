@@ -61,6 +61,15 @@ async def receive_trade_notification(
         
         logger.info(f"📨 Received trade notification: {trade_id[:20]}...")
         
+        # Filter: Skip trades with unknown outcome or missing market title
+        if payload.outcome == "UNKNOWN" or not payload.market_title:
+            logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (outcome: {payload.outcome}, market: {payload.market_title})")
+            return WebhookResponse(
+                status="ignored",
+                message="Trade filtered (unknown outcome or missing market)",
+                trade_id=trade_id
+            )
+        
         # Check if already sent (deduplication)
         if await check_trade_sent(trade_id):
             logger.debug(f"⏭️ Trade {trade_id[:20]}... already sent, skipping")

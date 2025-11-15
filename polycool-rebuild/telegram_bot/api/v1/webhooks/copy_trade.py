@@ -607,32 +607,48 @@ async def _store_trade_in_db(
                     logger.warning(f"⚠️ Failed to track smart position: {e}")
 
             # ✅ NEW: Notify alert channel bot for qualified smart wallet trades
+            # Only send if outcome is resolved and market title is available
             if (watched_address.address_type == 'smart_wallet' and
                 event.tx_type.upper() == 'BUY' and
                 (amount_usdc or 0.0) >= 300.0 and
                 watched_address.win_rate and
-                watched_address.win_rate >= 0.55):
+                watched_address.win_rate >= 0.55 and
+                outcome_str and outcome_str != "UNKNOWN"):  # Only send if outcome is known
                 # Check trade age (< 5 minutes)
                 trade_age_seconds = (datetime.now(timezone.utc) - timestamp_aware).total_seconds()
                 if trade_age_seconds < 300:  # 5 minutes
-                    # Trigger alert channel webhook (non-blocking)
-                    asyncio.create_task(
-                        _notify_alert_channel_bot(
-                            trade_id=event.tx_hash,
-                            market_id=event.market_id,
-                            position_id=event.position_id,
-                            wallet_address=watched_address.address,
-                            wallet_name=watched_address.name,
-                            win_rate=watched_address.win_rate,
-                            risk_score=watched_address.risk_score,
-                            outcome=outcome_str,  # outcome_str is defined above
-                            side=event.tx_type.upper(),
-                            price=price,
-                            value=amount_usdc,
-                            amount_usdc=amount_usdc,
-                            timestamp=timestamp_aware.isoformat()
+                    # Get market title before sending webhook
+                    market_title = None
+                    if event.market_id:
+                        try:
+                            market_service = get_market_service()
+                            market = await market_service.get_market_by_id(event.market_id)
+                            if market:
+                                market_title = market.get('title')
+                        except Exception as e:
+                            logger.debug(f"Could not fetch market title for webhook: {e}")
+                    
+                    # Only send if market title is available
+                    if market_title:
+                        # Trigger alert channel webhook (non-blocking)
+                        asyncio.create_task(
+                            _notify_alert_channel_bot(
+                                trade_id=event.tx_hash,
+                                market_id=event.market_id,
+                                position_id=event.position_id,
+                                wallet_address=watched_address.address,
+                                wallet_name=watched_address.name,
+                                win_rate=watched_address.win_rate,
+                                risk_score=watched_address.risk_score,
+                                outcome=outcome_str,
+                                side=event.tx_type.upper(),
+                                price=price,
+                                value=amount_usdc,
+                                amount_usdc=amount_usdc,
+                                timestamp=timestamp_aware.isoformat(),
+                                market_title=market_title
+                            )
                         )
-                    )
 
     except Exception as e:
         logger.error(f"❌ Error storing trade in DB: {e}")
@@ -651,7 +667,8 @@ async def _notify_alert_channel_bot(
     price: Optional[float],
     value: Optional[float],
     amount_usdc: Optional[float],
-    timestamp: str
+    timestamp: str,
+    market_title: Optional[str] = None
 ) -> None:
     """
     Notify alert channel bot about a qualified smart wallet trade
@@ -668,9 +685,8 @@ async def _notify_alert_channel_bot(
             logger.debug("⚠️ ALERT_CHANNEL_BOT_URL not set, skipping alert notification")
             return
         
-        # Get market title if available
-        market_title = None
-        if market_id:
+        # Use provided market_title or try to fetch if not provided
+        if not market_title and market_id:
             try:
                 market_service = get_market_service()
                 market = await market_service.get_market_by_id(market_id)
@@ -678,6 +694,11 @@ async def _notify_alert_channel_bot(
                     market_title = market.get('title')
             except Exception as e:
                 logger.debug(f"Could not fetch market title: {e}")
+        
+        # Skip if still no market title
+        if not market_title:
+            logger.debug(f"⚠️ Skipping alert - no market title for trade {trade_id[:20]}...")
+            return
         
         # Prepare webhook payload
         payload = {
