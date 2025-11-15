@@ -188,11 +188,13 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
         session_maker = get_async_session()
         async with session_maker() as session:
             cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=max_age_minutes)
+            # Convert to naive datetime for PostgreSQL TIMESTAMP WITHOUT TIME ZONE
+            cutoff_time_naive = cutoff_time.replace(tzinfo=None)
             
             result = await session.execute(
                 text("""
                     SELECT 
-                        t.id as trade_id,
+                        t.tx_hash as trade_id,
                         t.market_id,
                         t.position_id,
                         t.outcome,
@@ -217,14 +219,14 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                         AND t.timestamp >= :cutoff_time
                         AND t.amount_usdc >= :min_trade_value
                         AND NOT EXISTS (
-                            SELECT 1 FROM alert_channel_sent acs WHERE acs.trade_id = t.id
+                            SELECT 1 FROM alert_channel_sent acs WHERE acs.trade_id = t.tx_hash
                         )
                     ORDER BY t.timestamp DESC
                     LIMIT 50
                 """),
                 {
                     "min_win_rate": settings.min_win_rate,
-                    "cutoff_time": cutoff_time,
+                    "cutoff_time": cutoff_time_naive,
                     "min_trade_value": settings.min_trade_value
                 }
             )
