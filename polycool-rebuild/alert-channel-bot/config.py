@@ -24,8 +24,11 @@ class Settings(BaseSettings):
     poll_interval_seconds: int = int(os.getenv("POLL_INTERVAL_SECONDS", "60"))
     
     # Rate Limiting
-    rate_limit_max_per_hour: int = int(os.getenv("RATE_LIMIT_MAX_PER_HOUR", "10"))
-    rate_limit_min_interval_seconds: int = int(os.getenv("RATE_LIMIT_MIN_INTERVAL_SECONDS", "60"))
+    # Telegram channels allow up to 30 messages/second, but we use conservative limits
+    # to avoid hitting Telegram's spam detection. 100/hour = ~1 every 36 seconds
+    rate_limit_max_per_hour: int = int(os.getenv("RATE_LIMIT_MAX_PER_HOUR", "100"))
+    # Minimum 5 seconds between alerts to avoid spam detection
+    rate_limit_min_interval_seconds: int = int(os.getenv("RATE_LIMIT_MIN_INTERVAL_SECONDS", "5"))
     
     # Filtering Criteria (same as /smart_trading)
     min_trade_value: float = float(os.getenv("MIN_TRADE_VALUE", "300.0"))
