@@ -1,0 +1,18 @@
+# Alert Channel Bot - Minimal Dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-telegram-bot>=20.0
+python-dotenv>=1.0.0
+
+# Database
+psycopg[binary]>=3.1.0
+asyncpg>=0.29.0
+sqlalchemy>=2.0.0
+
+# HTTP Client
+httpx>=0.25.0
+
+# Settings
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
