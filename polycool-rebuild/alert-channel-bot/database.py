@@ -334,7 +334,9 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
             for position_id in position_ids:
                 try:
                     # Find market containing this position_id in clob_token_ids array
-                    # Use raw SQL with proper JSONB syntax (Market model import might fail)
+                    # Use raw SQL with proper JSONB syntax
+                    # Cast position_id to text and build JSONB array
+                    position_id_str = str(position_id)
                     result = await session.execute(
                         text("""
                             SELECT id, title, clob_token_ids, outcomes
@@ -343,13 +345,15 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                                 AND clob_token_ids @> jsonb_build_array(:position_id::text)
                             LIMIT 1
                         """),
-                        {"position_id": str(position_id)}
+                        {"position_id": position_id_str}
                     )
                     market_row = result.fetchone()
                     
                     if not market_row:
-                        logger.debug(f"⚠️ No market found for position_id {position_id[:20]}...")
+                        logger.debug(f"⚠️ No market found for position_id {position_id_str[:20]}...")
                         continue
+                    
+                    logger.debug(f"✅ Found market for position_id {position_id_str[:20]}...: {market_row[1][:30]}...")
                     
                     # Create a simple object to mimic Market model
                     class MarketObj:
