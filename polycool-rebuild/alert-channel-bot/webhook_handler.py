@@ -70,6 +70,16 @@ async def receive_trade_notification(
                 trade_id=trade_id
             )
         
+        # Filter: Skip trades below minimum trade value
+        trade_value = payload.value or payload.amount_usdc or 0.0
+        if trade_value < settings.min_trade_value:
+            logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (value: ${trade_value:.2f} < ${settings.min_trade_value:.2f})")
+            return WebhookResponse(
+                status="ignored",
+                message=f"Trade filtered (value ${trade_value:.2f} below minimum ${settings.min_trade_value:.2f})",
+                trade_id=trade_id
+            )
+        
         # Check if already sent (deduplication)
         if await check_trade_sent(trade_id):
             logger.debug(f"⏭️ Trade {trade_id[:20]}... already sent, skipping")
