@@ -236,18 +236,23 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
             )
             
             rows = result.fetchall()
+            logger.info(f"🔍 Found {len(rows)} raw trades from database query")
             
             # ⚡ OPTIMIZATION: Batch resolve market titles and outcomes using position_id
             # (Same approach as /smart_trading command)
             position_ids = [row[2] for row in rows if row[2]]  # position_id is at index 2
+            logger.info(f"🔍 Resolving {len(position_ids)} position_ids...")
             market_title_map = {}
             outcome_map = {}
             
             if position_ids:
                 # Resolve markets and outcomes from markets table using position_id
                 market_title_map, outcome_map = await _batch_resolve_markets_and_outcomes(position_ids)
+                logger.info(f"✅ Resolution complete: {len(market_title_map)} markets, {len(outcome_map)} outcomes resolved")
             
             trades = []
+            filtered_no_title = 0
+            filtered_unknown = 0
             for row in rows:
                 position_id = row[2]
                 
@@ -257,10 +262,14 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                 
                 # Skip if still no market title after resolution
                 if not resolved_market_title:
+                    filtered_no_title += 1
+                    logger.debug(f"⏭️ Filtered trade {row[0][:20]}... - no market title (position_id: {position_id[:20] if position_id else 'None'}...)")
                     continue
                 
                 # Skip if outcome is still UNKNOWN after resolution
                 if resolved_outcome == 'UNKNOWN':
+                    filtered_unknown += 1
+                    logger.debug(f"⏭️ Filtered trade {row[0][:20]}... - outcome still UNKNOWN")
                     continue
                 
                 trades.append({
@@ -280,7 +289,10 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                     "market_title": resolved_market_title  # Use resolved market title
                 })
             
-            logger.info(f"✅ Retrieved {len(trades)} qualified trades from database (after resolution)")
+            logger.info(
+                f"✅ Retrieved {len(trades)} qualified trades from database "
+                f"(after resolution: {filtered_no_title} filtered by no title, {filtered_unknown} filtered by UNKNOWN outcome)"
+            )
             return trades
             
     except Exception as e:
@@ -364,7 +376,7 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                     logger.debug(f"Error resolving market for position_id {position_id[:20]}...: {e}")
                     continue
             
-            logger.debug(f"✅ Resolved {len(market_title_map)} markets and {len(outcome_map)} outcomes")
+            logger.info(f"✅ Resolved {len(market_title_map)} markets and {len(outcome_map)} outcomes from {len(position_ids)} position_ids")
             return market_title_map, outcome_map
             
     except Exception as e:
