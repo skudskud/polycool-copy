@@ -286,3 +286,78 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
         logger.error(f"❌ Error getting recent qualified trades: {e}")
         return []
 
+
+async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[Dict[str, str], Dict[str, str]]:
+    """
+    Batch resolve market titles and outcomes from markets table using position_id
+    (Same approach as SmartTradingService)
+    
+    Args:
+        position_ids: List of position IDs to resolve
+        
+    Returns:
+        Tuple of (market_title_map, outcome_map) dictionaries
+    """
+    if not position_ids:
+        return {}, {}
+    
+    market_title_map = {}
+    outcome_map = {}
+    
+    try:
+        session_maker = get_async_session()
+        async with session_maker() as session:
+            for position_id in position_ids:
+                try:
+                    # Find market containing this position_id in clob_token_ids array
+                    # Use JSONB @> operator for array containment
+                    result = await session.execute(
+                        text("""
+                            SELECT id, title, clob_token_ids, outcomes
+                            FROM markets
+                            WHERE is_active = true
+                                AND clob_token_ids @> :position_id_array::jsonb
+                            LIMIT 1
+                        """),
+                        {"position_id_array": f'["{position_id}"]'}
+                    )
+                    
+                    market = result.fetchone()
+                    if not market:
+                        continue
+                    
+                    # Extract market data
+                    market_id = market[0]
+                    market_title = market[1]
+                    clob_token_ids = market[2] or []
+                    outcomes = market[3] or []
+                    
+                    if not clob_token_ids or not outcomes:
+                        continue
+                    
+                    # Find index of position_id in clob_token_ids array
+                    try:
+                        outcome_index = -1
+                        for i, token_id in enumerate(clob_token_ids):
+                            if str(token_id) == str(position_id):
+                                outcome_index = i
+                                break
+                        
+                        if outcome_index >= 0 and outcome_index < len(outcomes):
+                            market_title_map[position_id] = market_title
+                            outcome_map[position_id] = outcomes[outcome_index]
+                    except Exception as e:
+                        logger.debug(f"Error resolving outcome index for {position_id[:20]}...: {e}")
+                        continue
+                        
+                except Exception as e:
+                    logger.debug(f"Error resolving market for position_id {position_id[:20]}...: {e}")
+                    continue
+            
+            logger.debug(f"✅ Resolved {len(market_title_map)} markets and {len(outcome_map)} outcomes")
+            return market_title_map, outcome_map
+            
+    except Exception as e:
+        logger.error(f"❌ Error batch resolving markets: {e}")
+        return {}, {}
+
