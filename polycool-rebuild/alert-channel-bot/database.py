@@ -312,16 +312,16 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                 try:
                     # Find market containing this position_id in clob_token_ids array
                     # Use JSONB @> operator for array containment
-                    # Build JSONB array directly in SQL to avoid parameter binding issues
+                    # Use jsonb_build_array for proper JSONB array construction
                     result = await session.execute(
-                        text(f"""
+                        text("""
                             SELECT id, title, clob_token_ids, outcomes
                             FROM markets
                             WHERE is_active = true
-                                AND clob_token_ids @> :position_id_array::jsonb
+                                AND clob_token_ids @> jsonb_build_array(:position_id)
                             LIMIT 1
                         """),
-                        {"position_id_array": json.dumps([position_id])}
+                        {"position_id": position_id}
                     )
                     
                     market = result.fetchone()
