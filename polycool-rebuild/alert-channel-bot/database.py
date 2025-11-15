@@ -1,6 +1,7 @@
 """
 Database operations for Alert Channel Bot
 """
+import json
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List
@@ -311,15 +312,16 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                 try:
                     # Find market containing this position_id in clob_token_ids array
                     # Use JSONB @> operator for array containment
+                    # Build JSONB array directly in SQL to avoid parameter binding issues
                     result = await session.execute(
-                        text("""
+                        text(f"""
                             SELECT id, title, clob_token_ids, outcomes
                             FROM markets
                             WHERE is_active = true
                                 AND clob_token_ids @> :position_id_array::jsonb
                             LIMIT 1
                         """),
-                        {"position_id_array": f'["{position_id}"]'}
+                        {"position_id_array": json.dumps([position_id])}
                     )
                     
                     market = result.fetchone()
