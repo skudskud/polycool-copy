@@ -343,18 +343,37 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
                     # Extract market data
                     market_id = market[0]
                     market_title = market[1]
-                    clob_token_ids = market[2] or []
-                    outcomes = market[3] or []
+                    clob_token_ids_raw = market[2]
+                    outcomes_raw = market[3]
+                    
+                    # Handle JSONB data - it might come as list, dict, or string
+                    if clob_token_ids_raw is None or outcomes_raw is None:
+                        continue
+                    
+                    # Convert to Python list if needed
+                    if isinstance(clob_token_ids_raw, str):
+                        import json
+                        clob_token_ids = json.loads(clob_token_ids_raw)
+                    elif isinstance(clob_token_ids_raw, (list, tuple)):
+                        clob_token_ids = list(clob_token_ids_raw)
+                    else:
+                        # Try to convert other types
+                        clob_token_ids = list(clob_token_ids_raw) if hasattr(clob_token_ids_raw, '__iter__') else []
+                    
+                    if isinstance(outcomes_raw, str):
+                        import json
+                        outcomes = json.loads(outcomes_raw)
+                    elif isinstance(outcomes_raw, (list, tuple)):
+                        outcomes = list(outcomes_raw)
+                    else:
+                        outcomes = list(outcomes_raw) if hasattr(outcomes_raw, '__iter__') else []
                     
                     if not clob_token_ids or not outcomes:
+                        logger.debug(f"⚠️ Empty clob_token_ids or outcomes for market {market_id}")
                         continue
                     
                     # Find index of position_id in clob_token_ids array
                     try:
-                        # clob_token_ids is a JSONB array, convert to Python list if needed
-                        if isinstance(clob_token_ids, str):
-                            import json
-                            clob_token_ids = json.loads(clob_token_ids)
                         
                         outcome_index = -1
                         for i, token_id in enumerate(clob_token_ids):
