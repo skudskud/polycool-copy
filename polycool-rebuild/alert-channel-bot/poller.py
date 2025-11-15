@@ -71,6 +71,11 @@ class TradePoller:
                 try:
                     trade_id = trade.get('trade_id')
                     
+                    # Filter: Skip trades with unknown outcome or missing market title
+                    if trade.get('outcome') == 'UNKNOWN' or not trade.get('market_title'):
+                        logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (outcome: {trade.get('outcome')}, market: {trade.get('market_title')})")
+                        continue
+                    
                     # Double-check deduplication (race condition protection)
                     if await check_trade_sent(trade_id):
                         logger.debug(f"⏭️ Trade {trade_id[:20]}... already sent, skipping")
