@@ -334,44 +334,31 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
             for position_id in position_ids:
                 try:
                     # Find market containing this position_id in clob_token_ids array
-                    # Use SQLAlchemy ORM like SmartTradingService does (if Market model available)
-                    # Otherwise fallback to raw SQL
-                    if Market:
-                        result = await session.execute(
-                            select(Market).where(
-                                Market.is_active == True,
-                                Market.clob_token_ids.op('@>')([position_id])
-                            ).limit(1)
-                        )
-                        market = result.scalar_one_or_none()
-                    else:
-                        # Fallback to raw SQL if Market model not available
-                        result = await session.execute(
-                            text("""
-                                SELECT id, title, clob_token_ids, outcomes
-                                FROM markets
-                                WHERE is_active = true
-                                    AND clob_token_ids @> jsonb_build_array(:position_id)
-                                LIMIT 1
-                            """),
-                            {"position_id": str(position_id)}
-                        )
-                        market_row = result.fetchone()
-                        if not market_row:
-                            market = None
-                        else:
-                            # Create a simple object to mimic Market model
-                            class MarketObj:
-                                def __init__(self, id, title, clob_token_ids, outcomes):
-                                    self.id = id
-                                    self.title = title
-                                    self.clob_token_ids = clob_token_ids
-                                    self.outcomes = outcomes
-                            market = MarketObj(market_row[0], market_row[1], market_row[2], market_row[3])
+                    # Use raw SQL with proper JSONB syntax (Market model import might fail)
+                    result = await session.execute(
+                        text("""
+                            SELECT id, title, clob_token_ids, outcomes
+                            FROM markets
+                            WHERE is_active = true
+                                AND clob_token_ids @> jsonb_build_array(:position_id::text)
+                            LIMIT 1
+                        """),
+                        {"position_id": str(position_id)}
+                    )
+                    market_row = result.fetchone()
                     
-                    if not market:
+                    if not market_row:
                         logger.debug(f"⚠️ No market found for position_id {position_id[:20]}...")
                         continue
+                    
+                    # Create a simple object to mimic Market model
+                    class MarketObj:
+                        def __init__(self, id, title, clob_token_ids, outcomes):
+                            self.id = id
+                            self.title = title
+                            self.clob_token_ids = clob_token_ids
+                            self.outcomes = outcomes
+                    market = MarketObj(market_row[0], market_row[1], market_row[2], market_row[3])
                     
                     # Extract market data
                     market_id = market.id
