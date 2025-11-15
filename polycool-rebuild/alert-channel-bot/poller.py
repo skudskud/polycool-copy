@@ -70,6 +70,12 @@ class TradePoller:
             for trade in trades:
                 try:
                     trade_id = trade.get('trade_id')
+                    trade_value = trade.get('value', 0.0)
+                    
+                    # Filter: Skip trades below minimum trade value (double-check)
+                    if trade_value < settings.min_trade_value:
+                        logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (value: ${trade_value:.2f} < ${settings.min_trade_value:.2f})")
+                        continue
                     
                     # Filter: Skip trades with unknown outcome or missing market title
                     if trade.get('outcome') == 'UNKNOWN' or not trade.get('market_title'):

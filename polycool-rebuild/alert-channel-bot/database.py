@@ -205,6 +205,9 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
             # Convert to naive datetime for PostgreSQL TIMESTAMP WITHOUT TIME ZONE
             cutoff_time_naive = cutoff_time.replace(tzinfo=None)
             
+            # Log the filter value being used for debugging
+            logger.info(f"🔍 Querying trades with min_trade_value=${settings.min_trade_value:.2f}, min_win_rate={settings.min_win_rate:.2f}")
+            
             result = await session.execute(
                 text("""
                     SELECT 
