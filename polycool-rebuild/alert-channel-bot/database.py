@@ -21,10 +21,11 @@ def get_async_engine():
     """Get or create async database engine"""
     global _async_engine
     if _async_engine is None:
-        # Convert postgresql:// to postgresql+asyncpg:// for async operations
+        # Convert postgresql:// to postgresql+psycopg:// for async operations
+        # psycopg is more compatible with PgBouncer than asyncpg
         db_url = settings.database_url
         if db_url.startswith("postgresql://"):
-            db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
         
         _async_engine = create_async_engine(
             db_url,

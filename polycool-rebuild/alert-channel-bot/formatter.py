@@ -170,10 +170,10 @@ def format_alert_message(trade_data: Dict[str, Any]) -> str:
     """
     try:
         # Extract fields
-        market_title = trade_data.get('market_title', 'Unknown Market')
-        if len(market_title) > 150:
+        market_title = trade_data.get('market_title') or 'Unknown Market'
+        if market_title and len(market_title) > 150:
             market_title = market_title[:147] + "..."
-        market_title = escape_markdown(market_title)
+        market_title = escape_markdown(market_title) if market_title else 'Unknown Market'
         
         timestamp = trade_data.get('timestamp')
         timestamp_str = format_timestamp(timestamp)
