@@ -12,6 +12,17 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from config import settings
 
+# Import Market model - need to use relative import or sys.path
+import sys
+import os
+# Add parent directory to path to import from core
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+try:
+    from core.database.models import Market
+except ImportError:
+    # Fallback: define Market inline if import fails
+    Market = None
+
 logger = logging.getLogger(__name__)
 
 # Create async engine for database operations
@@ -323,28 +334,50 @@ async def _batch_resolve_markets_and_outcomes(position_ids: List[str]) -> tuple[
             for position_id in position_ids:
                 try:
                     # Find market containing this position_id in clob_token_ids array
-                    # Use JSONB @> operator for array containment
-                    # Use to_jsonb to properly convert position_id to JSONB
-                    result = await session.execute(
-                        text("""
-                            SELECT id, title, clob_token_ids, outcomes
-                            FROM markets
-                            WHERE is_active = true
-                                AND clob_token_ids @> to_jsonb(:position_id_array::text[])
-                            LIMIT 1
-                        """),
-                        {"position_id_array": [position_id]}  # Pass as array
-                    )
+                    # Use SQLAlchemy ORM like SmartTradingService does (if Market model available)
+                    # Otherwise fallback to raw SQL
+                    if Market:
+                        result = await session.execute(
+                            select(Market).where(
+                                Market.is_active == True,
+                                Market.clob_token_ids.op('@>')([position_id])
+                            ).limit(1)
+                        )
+                        market = result.scalar_one_or_none()
+                    else:
+                        # Fallback to raw SQL if Market model not available
+                        result = await session.execute(
+                            text("""
+                                SELECT id, title, clob_token_ids, outcomes
+                                FROM markets
+                                WHERE is_active = true
+                                    AND clob_token_ids @> jsonb_build_array(:position_id)
+                                LIMIT 1
+                            """),
+                            {"position_id": str(position_id)}
+                        )
+                        market_row = result.fetchone()
+                        if not market_row:
+                            market = None
+                        else:
+                            # Create a simple object to mimic Market model
+                            class MarketObj:
+                                def __init__(self, id, title, clob_token_ids, outcomes):
+                                    self.id = id
+                                    self.title = title
+                                    self.clob_token_ids = clob_token_ids
+                                    self.outcomes = outcomes
+                            market = MarketObj(market_row[0], market_row[1], market_row[2], market_row[3])
                     
-                    market = result.fetchone()
                     if not market:
+                        logger.debug(f"⚠️ No market found for position_id {position_id[:20]}...")
                         continue
                     
                     # Extract market data
-                    market_id = market[0]
-                    market_title = market[1]
-                    clob_token_ids_raw = market[2]
-                    outcomes_raw = market[3]
+                    market_id = market.id
+                    market_title = market.title
+                    clob_token_ids_raw = market.clob_token_ids
+                    outcomes_raw = market.outcomes
                     
                     # Handle JSONB data - it might come as list, dict, or string
                     if clob_token_ids_raw is None or outcomes_raw is None:
