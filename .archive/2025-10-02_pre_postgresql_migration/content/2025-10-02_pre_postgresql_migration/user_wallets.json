@@ -1,0 +1,19 @@
+{
+  "6500527972": {
+    "address": "0xaEF1Da195Dd057c9252A6C03081B70f38453038c",
+    "private_key": "405cd7b0ad3c4ea8b0870759812afc0bf10dc6c9c9ca59108815a36e7ea2f08c",
+    "username": "kalzerinho",
+    "created_at": 1759241509.963538,
+    "funded": true,
+    "usdc_approved": true,
+    "polymarket_approved": true,
+    "api_credentials_generated": true,
+    "auto_approval_completed": true,
+    "last_approval_check": 1759326727.839293,
+    "auto_approval_attempted": false,
+    "auto_approval_in_progress": false,
+    "auto_approval_last_attempt": 1759326714.065857,
+    "auto_approval_failure_count": 0,
+    "auto_api_generated": true
+  }
+}

@@ -1,0 +1,47 @@
+version: '3.8'
+
+# Docker Compose for local multi-service testing
+# This file provides Redis for local testing
+# Note: Database is Supabase production (not local)
+# Note: Services (API, Bot, Workers) are run via scripts, not Docker
+
+services:
+  # Redis Cache (local only)
+  redis:
+    image: redis:7-alpine
+    container_name: polycool-redis-local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_local_data:/data
+      - ./infrastructure/config/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - polycool-local-network
+
+  # Redis Commander (GUI for Redis) - Optional
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: polycool-redis-commander-local
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - polycool-local-network
+    profiles:
+      - tools
+
+volumes:
+  redis_local_data:
+
+networks:
+  polycool-local-network:
+    driver: bridge

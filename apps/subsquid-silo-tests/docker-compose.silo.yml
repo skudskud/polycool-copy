@@ -1,0 +1,237 @@
+version: '3.9'
+
+services:
+  # ========================================
+  # Infrastructure
+  # ========================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: subsquid-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: subsquid-postgres
+    environment:
+      POSTGRES_DB: subsquid
+      POSTGRES_USER: subsquid
+      POSTGRES_PASSWORD: subsquid_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subsquid"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+
+  # ========================================
+  # Off-Chain Services
+  # ========================================
+
+  poller:
+    build:
+      context: .
+      target: production
+    container_name: subsquid-poller
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      REDIS_URL: redis://redis:6379/0
+      EXPERIMENTAL_SUBSQUID: "true"
+      POLLER_ENABLED: "true"
+      POLL_MS: "60000"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.polling.poller
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  streamer:
+    build:
+      context: .
+      target: production
+    container_name: subsquid-streamer
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      REDIS_URL: redis://redis:6379/0
+      EXPERIMENTAL_SUBSQUID: "true"
+      STREAMER_ENABLED: "true"
+      CLOB_WSS_URL: "wss://ws.clob.polymarket.com"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.ws.streamer
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  webhook:
+    build:
+      context: .
+      target: production
+    container_name: subsquid-webhook
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      REDIS_URL: redis://redis:6379/0
+      EXPERIMENTAL_SUBSQUID: "true"
+      WEBHOOK_ENABLED: "true"
+      WEBHOOK_HOST: "0.0.0.0"
+      WEBHOOK_PORT: "8081"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.wh.webhook_worker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  bridge:
+    build:
+      context: .
+      target: production
+    container_name: subsquid-bridge
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      REDIS_URL: redis://redis:6379/0
+      EXPERIMENTAL_SUBSQUID: "true"
+      REDIS_BRIDGE_ENABLED: "true"
+      REDIS_BRIDGE_WEBHOOK_URL: "http://webhook:8081/wh/market"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      webhook:
+        condition: service_healthy
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.redis.bridge
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # On-Chain Service (DipDup)
+  # ========================================
+
+  indexer:
+    build:
+      context: .
+      dockerfile: indexer/Dockerfile || Dockerfile
+      target: production
+    container_name: subsquid-indexer
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      EXPERIMENTAL_SUBSQUID: "true"
+      POLYGON_RPC_URL: "https://polygon-rpc.com"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.main  # Will be replaced with dipdup command
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # Orchestrator (All Services)
+  # ========================================
+
+  orchestrator:
+    build:
+      context: .
+      target: production
+    container_name: subsquid-orchestrator
+    environment:
+      DATABASE_URL: postgresql://subsquid:subsquid_dev_password@postgres:5432/subsquid
+      REDIS_URL: redis://redis:6379/0
+      EXPERIMENTAL_SUBSQUID: "true"
+      POLLER_ENABLED: "true"
+      STREAMER_ENABLED: "true"
+      WEBHOOK_ENABLED: "true"
+      REDIS_BRIDGE_ENABLED: "true"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - subsquid-network
+    restart: unless-stopped
+    command: python -m src.main
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  subsquid-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:

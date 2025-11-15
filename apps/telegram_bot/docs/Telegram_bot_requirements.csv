@@ -1,0 +1,402 @@
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,Commands,Copy,Main buttons,CopySub1,FunctionnalitySub1 ,Sub1buttons,CopySub2,FunctionnalitySub2,Sub2buttons,CopySub3,FunctionnalitySub3,Sub3Buttons,CopySub4,FunctionnalitySub4,Sub4Buttons
+,/start,"👋 Welcome back, @kalzerinho!
+
+Status: 🚀 READY TO TRADE ✅
+
+💼 Your Wallet:
+0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Balance: 3.54 USDC.e",Wallet,Goes to /wallet flow,Goes to /wallet flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/start,"👋 Welcome back, @kalzerinho!
+
+Status: 🚀 READY TO TRADE ✅
+
+💼 Your Wallet:
+0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Balance: 3.54 USDC.e",Markets,Goes to /markets flow,Goes to /markets flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/start,"👋 Welcome back, @kalzerinho!
+
+Status: 🚀 READY TO TRADE ✅
+
+💼 Your Wallet:
+0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Balance: 3.54 USDC.e",Positions,Goes to /position flow,Goes to /position flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/start,"👋 Welcome back, @kalzerinho!
+
+Status: 🚀 READY TO TRADE ✅
+
+💼 Your Wallet:
+0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Balance: 3.54 USDC.e",Leaderboard,Goes to /leaderboard flow,Goes to /leaderboard flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/start,"👋 Welcome back, @kalzerinho!
+
+Status: 🚀 READY TO TRADE ✅
+
+💼 Your Wallet:
+0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Balance: 3.54 USDC.e",Withdraw,Goes to /withdraw flow,Goes to /withdraw flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Polygon Private Key,"SECRET POLYGON PRIVATE KEY 
+
+DO NOT SHARE IT
+
+private key decrypted
+
+Message will self destruct in 15 seconds","at the destruction, back to /wallet",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Solana Private Key,"SECRET SOLANA PRIVATE KEY 
+
+DO NOT SHARE IT
+
+private key decrypted
+
+Message will self destruct in 15 seconds","at the destruction, back to /wallet",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Bridge from Solana,"🌉 BRIDGE SOL TO POLYGON
+
+📍 Your Wallets:
+🔶 Solana: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+🔷 Polygon: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Current SOL Balance: 0.0000 SOL
+
+💡 How it works:
+1. Send SOL to your Solana address above
+2. Use this command to bridge
+3. Receive USDC.e + POL on Polygon automatically
+
+⚡ Features:
+• Auto-convert SOL → USDC → USDC.e
+• Auto gas refuel (~3 POL)
+• All-in-one solution
+• Takes ~3-5 minutes
+        
+
+⚠️ Minimum required: 0.1 SOL
+
+Please send SOL to your address above first.",Checks Solana balance + Allows Solana Bridge if balance >= 0.1 when user clicks button,"If Balance ok then ""Bridge Auto"", otherwise ""Refresh balance""","Bridge Started ! 
+
+add bridging infodynamically 
+
+show final balance and debridge fees",Bridge from Solana Adress to Polygon address (first swap from sol to usdc then use debridge to bridge usdc to POL then swap 95% of POL to usdc.e),Back to /wallet,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Bridge from Solana,"🌉 BRIDGE SOL TO POLYGON
+
+📍 Your Wallets:
+🔶 Solana: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+🔷 Polygon: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Current SOL Balance: 0.0000 SOL
+
+💡 How it works:
+1. Send SOL to your Solana address above
+2. Use this command to bridge
+3. Receive USDC.e + POL on Polygon automatically
+
+⚡ Features:
+• Auto-convert SOL → USDC → USDC.e
+• Auto gas refuel (~3 POL)
+• All-in-one solution
+• Takes ~3-5 minutes
+        
+
+⚠️ Minimum required: 0.1 SOL
+
+Please send SOL to your address above first.",Checks Solana balance + Allows Solana Bridge if balance >= 0.1 when user clicks button,Copy Solana Address,None,Triggers copy of Solana Address,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Bridge from Solana,"🌉 BRIDGE SOL TO POLYGON
+
+📍 Your Wallets:
+🔶 Solana: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+🔷 Polygon: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+
+💰 Current SOL Balance: 0.0000 SOL
+
+💡 How it works:
+1. Send SOL to your Solana address above
+2. Use this command to bridge
+3. Receive USDC.e + POL on Polygon automatically
+
+⚡ Features:
+• Auto-convert SOL → USDC → USDC.e
+• Auto gas refuel (~3 POL)
+• All-in-one solution
+• Takes ~3-5 minutes
+        
+
+⚠️ Minimum required: 0.1 SOL
+
+Please send SOL to your address above first.",Checks Solana balance + Allows Solana Bridge if balance >= 0.1 when user clicks button,Back to Wallet,Goes to /wallet,NA,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Withdraw SOL,Goes to /withdraw flow,Goes to /withdraw flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/wallet,"💼 YOUR WALLETS
+
+👤 Telegram ID: 6500527972
+
+🔷 POLYGON WALLET
+📍 Address: 0xE235db7fcbc64161028eFbc0E131852188d8f11D
+💰 Balances:
+  • USDC.e: 8.64
+  • POL: 0.7109
+
+🔶 SOLANA WALLET
+📍 Address: CwQ6dqwT2TFuftYpf2isA7HMRSzZbVQLF95EmU8Noyz
+💰 Balance:
+  • SOL: 0.0000
+
+🔑 Status:
+Wallet ready for trading!
+
+💡 Actions:
+• View private keys (buttons below)
+• Bridge SOL to Polygon (button below)
+• Withdraw funds securely",Withdraw USDC,Goes to /withdraw flow,Goes to /withdraw flow,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume","Buttons side by side :
+By Volume
+By Creation Date
+Trending
+",NA," each button reorder the markets based on the selected button
+
+By volume is the default (if possible, show which order is in place)
+if  trending is selected, then markets repop with the correct order",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume","1 button per Categories
+
+Geopolitics, Crypto, Sports, Others",NA,Displays markets of the selected category,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : First scenario -> selected ""market"" is an event, in other words, a group of markets. Example : Who will win the Superbowl 2026 ? There a several teams that could win it (several sub markets then), each one get its own YES/NO outcome.
+
+Copy: Titre of the event selected with a few statistics (volume, creaton date)
+With all sub markets displayed, with statistics like volume and yes/no price (10max per page)",Displays selected event with submarkets,"1 button per sub market
+1 button for the pages (next/previous)",Displays market and information abt it,"Then its the same flow as below, the one for a single market with 4 buttons, instant buys YES or NO or Limit BUY YES/NO and following path",,,,,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Instant Buy Yes at Current price,"repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"Custom amount 
+","Bot asks the user the amount he wants to spend (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)",confirm the amount the user wants to spend,and then confirm the whole transaction,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Instant Buy Yes at Current price,"repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"buttons for pre-set up amount :
+10
+50
+100","when selected pre-set up amount, show user recap of the transaction he is about to validate, like title of the market, price, outcome selected, potential profit, and amount. ",confirm the transaction,"""confirm"" or ""cancel"" buttons to validate or not the transaction",NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Instant buy No at current price,"repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"Custom amount 
+","Bot asks the user the amount he wants to spend (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)",confirm the amount the user wants to spend,and then confirm the whole transaction,NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Instant buy No at current price,"repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"buttons for pre-set up amount :
+10
+50
+100","when selected pre-set up amount, show user recap of the transaction he is about to validate, like title of the market, price, outcome selected, potential profit, and amount. ",confirm the transaction,"""confirm"" or ""cancel"" buttons to validate or not the transaction",NA,NA,NA
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Limite Buy Yes,Asks user for a limit buy price ( and redisplay the title of the market and the current price),"Bot asks the user the price at which he want to place his order (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)","repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"Custom amount 
+","Bot asks the user the amount he wants to spend (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)",confirm the amount the user wants to spend,Validation with the user,Confirm or cancel
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Limite Buy Yes,Asks user for a limit buy price ( and redisplay the title of the market and the current price),"Bot asks the user the price at which he want to place his order (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)","repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"buttons for pre-set up amount :
+10
+50
+100","when selected pre-set up amount, show user recap of the transaction he is about to validate, like title of the market, price, outcome selected, potential profit, and amount. ",confirm the transaction,Validation with the user,Confirm or cancel
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Limit buy No,Asks user for a limit buy price ( and redisplay the title of the market and the current price),"Bot asks the user the price at which he want to place his order (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)","repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"Custom amount 
+","Bot asks the user the amount he wants to spend (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)",confirm the amount the user wants to spend,Validation with the user,Confirm or cancel
+,/markets,"MARKETS
+
+Display top 10 markets by volume",1 buttons per market displayed (10 markets so 10 buttons),"Context : Second scenario, ""market"" is a simple marke. Example : ""Will Trump and Poutine meet in 2025?"". The outcome is yes/no.
+
+Copy: Title of the event selected and a few statistics (volume, yes no price)
+
+",Displays market and information abt it,Limit buy No,Asks user for a limit buy price ( and redisplay the title of the market and the current price),"Bot asks the user the price at which he want to place his order (for him to enter it via typing) and re-show info of the selection (market title, outcome selected)","repeat the market title  and main relevant info
+
+and asks user how much he wants to spend",Get the amount the users want to spend on this market and outcome,"buttons for pre-set up amount :
+10
+50
+100","when selected pre-set up amount, show user recap of the transaction he is about to validate, like title of the market, price, outcome selected, potential profit, and amount. ",confirm the transaction,Validation with the user,Confirm or cancel
+,/markets,"MARKETS
+
+Display top 10 markets by volume",2 buttons for next page or previous page (previous page button not enable on first page),NA,Displays next or previous page,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,
+,/search,,,,,,,,,,,,,,
+,/positions,,,,,,,,,,,,,,
+,/smart_trading,,,,,,,,,,,,,,
+,/copy_trading,,,,,,,,,,,,,,
+,/history,,,,,,,,,,,,,,
+,/leaderboard,,,,,,,,,,,,,,

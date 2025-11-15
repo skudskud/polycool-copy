@@ -1,0 +1,118 @@
+,Commands,Copy,Main buttons,CopySub1,FunctionnalitySub1 ,Sub1buttons,CopySub2,FunctionnalitySub2,Sub2buttons,CopySub3,FunctionnalitySub3,Sub3Buttons,CopySub4,FunctionnalitySub4,Sub4Buttons
+,/positions,"📊 **Your Positions**
+
+💼 **Wallet:** `0xE235...f11D`
+📊 **Total Positions:** 3
+
+**1. YES - Will BTC hit 100k in 2025?**
+    🪙 Tokens: 45.00
+    💵 Buy Price: $0.512345
+    🔗 Market: https://polymarket.com/market/will-btc-hit-100k-2025
+    📈 Midpoint: $0.587000
+    💵 Value: ~$26.37
+    📈 Current: $0.587000
+    📊 PNL (w/ fees): 🟢 **+$3.45 (+12.3%)**
+    🎯 TP/SL: Not set
+
+━━━━━━━━━━━━━━━━━━━━
+💰 **Total Value: ~$123.45**
+🎯 **Active TP/SL Orders:** 1","Inline controls: 🔄 Refresh / 📊 View All TP/SL / per-position ⚙️ or 📝 / per-position 💸 / 📊 Browse Markets","🔄 Refresh → ""🔄 Refreshing..."" toast then re-renders the list with fresh blockchain data (timestamp visible on refresh variant).","Invalidates cached positions, hits Polymarket API, rebuilds markdown and inline keyboard.","Same inline keyboard as initial view","📊 View All TP/SL → ""📊 **Active TP/SL Orders** (n)"" list with entry/TP/SL lines.","Lists each trigger with edit/cancel options; keeps user inside callback flow.","📝 Edit #i | ❌ Cancel #i | 🔙 Back to Positions","⚙️ / 📝 Set or Edit TP/SL (per position).","Sends position context to TP/SL handler so user can configure or update triggers.","Dedicated TP/SL conversational menus (see /tpsl flow).","💸 Sell (per position) → opens detailed sell quote view.","Builds payout preview with live pricing, fee estimate, and sell amount shortcuts.","25% (~$X) | 50% (~$X) | 75% (~$X) | 100% (~$X) | 💰 Custom USD Amount | ⬅️ Back to Positions"
+,/positions,"💸 **SELL POSITION**
+
+**YES - Will BTC hit 100k in 2025?**
+
+📦 **Tokens:** 45.00
+💰 **Market Price:** $0.587000
+💵 **You'll receive:** ~$26.11 (after 1% fee)
+
+**Market Conditions:**
+📊 **Market Spread:** $0.02
+
+**Estimated Range:** $25.80 - $26.45
+
+💰 **Your Balance:** 310.25 USDC
+
+**Choose sell amount:**","25% (~$6.53)
+50% (~$13.05)
+75% (~$19.58)
+100% (~$26.11)
+💰 Custom USD Amount
+⬅️ Back to Positions","⚡ **Executing sell order...**","Calls speed_sell_with_token_id with suggested price, then waits for execution or timeout.","NA","💰 **SELL EXECUTED!**
+
+✅ **Market:** Will BTC hit 100k in 2025?...
+🎯 **Position:** YES
+📦 **Sold:** 22 tokens
+💵 **Price/Token:** $0.592000
+💰 **Amount Received:** $13.02
+💳 **Fees Paid:** $0.10 (buy) + $0.13 (sell)
+💵 **Net Received:** $12.79
+🟢 **+$1.24 (+10.8%)**
+
+✅ **Execution:** REAL price from blockchain
+📋 **Transaction ID:** `0xabc123...`
+📊 **Order ID:** `0f4d57d3...`
+
+🎉 **Order executing on Polymarket!**","Shows fill summary, invalidates cache, logs transaction, triggers async fee collection + TP/SL sync.","NA","⏳ **ORDER SUBMITTED - PENDING CONFIRMATION**
+
+📦 **Selling:** 45 YES tokens
+📊 **Market:** Will BTC hit 100k in 2025?...
+💵 **Estimated:** ~$26.11
+
+⚠️ Confirmation is taking longer than expected.
+Order likely submitted—check /history or Polygonscan.","Timeout guard shown on network delays; reassures user the order is in flight.","NA","⬅️ Back to Positions → refreshes list.","Calls positions_refresh callback to rebuild blockchain-backed overview.","Same inline keyboard as refreshed positions view"
+,/positions,"💰 **Sell YES Position**
+
+📊 **Market:** Will BTC hit 100k in 2025?...
+📦 **Your Position:** 45 tokens
+💵 **Estimated Value:** ~$26.37
+💰 **Your Balance:** 310.25 USDC
+
+**💸 Enter USD amount to sell:**
+Examples: `25`, `50.50`, `100`
+
+💡 *Enter any amount up to $26.37*","❌ Cancel (refresh_positions)","Abort prompt and reload blockchain positions overview.","Positions list with refresh + sell buttons","🎯 **Confirm Sell Order**
+
+📊 **Market:** Will BTC hit 100k in 2025?...
+🎯 **Position:** YES
+💵 **Sell Amount:** $25.00
+📦 **Est. Tokens:** ~45 tokens (capped by holdings)
+💰 **Est. Price:** ~$0.5200/token
+
+⚡ **Ready to execute instantly!**","Confirms typed USD amount and converts to token quantity.","✅ Confirm Sell | ❌ Cancel","💰 **SELL EXECUTED!**
+
+✅ **Market:** Will BTC hit 100k in 2025?...
+🎯 **Position:** YES
+📦 **Sold:** 45 tokens
+💵 **Amount Received:** $23.40
+🟢 **+$1.10 (+4.6%)**
+
+📋 **Order ID:** `8c92be5f...`
+📊 **Remaining:** 0 tokens
+
+🎉 **Trade executing on Polymarket!**","Direct USD-based sell via execute_direct_sell; logs transaction and updates remaining tokens.","NA","NA","NA","NA"
+,/positions (refresh_positions callback),"🎯 **YOUR BLOCKCHAIN POSITIONS** (Refreshed)
+
+📊 Global P&L summary…
+👤 **User:** 6500527972
+📍 **Wallet:** `0xE235...f11D`
+📊 **Total Positions:** 3
+
+**1. YES - Will BTC hit 100k in 2025?**
+   📦 Tokens: 45
+   💰 Buy Price: $0.51
+   📈 Current: $0.59 (🚀 CACHE, 12ms)
+   🟢 P&L: +$1.24 (+10.8%)
+
+✅ **100% Blockchain Verified**
+🔄 **Fresh data from blockchain + Live P&L**","Per-position buttons (pos_i), then 🔄 Refresh Again, 📊 Browse Markets","Selecting a position → formatted detail with P&L if available.","Shows outcome, tokens, cost, optional P&L.","💰 Sell Custom Amount | 📊 Sell All Position | 🔙 Back","🔄 Refresh Again → ""🔍 **Refreshing blockchain positions...**""","Forces another on-chain fetch and rebuilds summary.","Same refreshed positions keyboard","📊 Browse Markets → opens markets_page_0 pagination.","Routes user to top markets flow with volume leaderboard.","Top 10 market buttons + pagination","NA","NA","NA"
+,/positions,"📭 **No positions found**
+
+✨ Your wallet has no active positions.
+
+Use /markets to start trading!","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA"
+,/positions,"❌ **No wallet found!**
+
+Use /start to create your wallet.","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA"
+,/positions,"❌ **API Error**: 502
+
+Polymarket API is down.","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA","NA"

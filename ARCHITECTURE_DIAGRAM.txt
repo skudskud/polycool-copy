@@ -1,0 +1,324 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║         🏗️ PY-CLOB-SERVER V2 - RAILWAY DEPLOYMENT ARCHITECTURE              ║
+║                                                                                  ║
+║                        Audit Date: 2025-10-19                                   ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🚀 RAILWAY INFRASTRUCTURE (Deployment Container)                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │ Railway Container (NIXPACKS builder)                                     │  │
+│  │ • Builder: NIXPACKS                                                      │  │
+│  │ • Build Command: pip install -r requirements.txt                         │  │
+│  │ • Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT          │  │
+│  │ • Memory: 512 MB (configurable)                                          │  │
+│  │ • Restart Policy: ON_FAILURE (max 10 retries)                           │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                  │
+│  ⚠️ CRITICAL: Healthcheck Configuration                                       │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │ Readiness Probe (❌ PROBLÈME IDENTIFIÉ #2)                              │  │
+│  │ ├─ path: /health                                                         │  │
+│  │ ├─ initialDelaySeconds: 60 ← TOO SHORT! Should be 180                   │  │
+│  │ ├─ timeoutSeconds: 10                                                    │  │
+│  │ ├─ periodSeconds: 10                                                     │  │
+│  │ └─ failureThreshold: 5                                                   │  │
+│  │                                                                           │  │
+│  │ ✅ Migrations take ~60-100 seconds                                       │  │
+│  │ ✅ Readiness probe at 60s = premature timeout                           │  │
+│  │ ✅ Result: Container killed → redeploy infinite loop                    │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  📊 FASTAPI APPLICATION STARTUP SEQUENCE (main.py:103-416)                      │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  1️⃣  /health endpoint ready IMMEDIATELY                                         │
+│      └─ Returns: {"status": "healthy", "timestamp": ...}                        │
+│                                                                                  │
+│  2️⃣  DATABASE MIGRATIONS (SYNCHRONOUS - BLOCKING)                               │
+│      ├─ run_withdrawal_migration()          ~5-10 seconds                       │
+│      │  └─ Creates withdrawals table                                            │
+│      │                                                                           │
+│      ├─ run_smart_wallet_migration()        ~10-20 seconds                      │
+│      │  └─ Creates smart_wallets tables                                         │
+│      │  └─ ❌ PROBLEM #4: Uses relative path (can fail)                        │
+│      │                                                                           │
+│      └─ run_fix_market_id_migration()       ~5-10 seconds                       │
+│         └─ Fixes market_id column length                                        │
+│         └─ ❌ PROBLEM #4: Uses relative path (can fail)                        │
+│                                                                                  │
+│  3️⃣  PostgreSQL CONNECTION CHECK                                                │
+│      └─ count_by_status() query                                                 │
+│                                                                                  │
+│  4️⃣  SCHEDULER JOBS (APScheduler - ASYNC)                                       │
+│      ├─ Market Updater HIGH PRIORITY    (every 5 min)                           │
+│      ├─ Market Updater LOW PRIORITY     (every 1 hour)                          │
+│      ├─ Hot Price Updater              (every 60 seconds) - Redis cache         │
+│      └─ New Market Detector             (every 5 minutes) - Events API          │
+│                                                                                  │
+│  5️⃣  AUTO-APPROVAL SERVICE (if ENABLED)                                         │
+│      └─ monitor_unfunded_wallets() (every 30 seconds)                           │
+│                                                                                  │
+│  6️⃣  SMART WALLET MONITOR                                                       │
+│      ├─ Initialize SmartWalletMonitorService                                    │
+│      ├─ Load curated wallets from CSV                                           │
+│      └─ Initial backfill (last 2 days) - ASYNC in background                    │
+│         └─ ⚠️ PROBLEM #7: Can take 10-15 minutes on first deploy!              │
+│                                                                                  │
+│  7️⃣  TWITTER BOT (if TWITTER_ENABLED=true)                                     │
+│      └─ TwitterBotService initialized                                           │
+│      └─ Scheduled: process_pending_trades (every 2 minutes)                     │
+│                                                                                  │
+│  8️⃣  TELEGRAM BOT INITIALIZATION & POLLING                                      │
+│      ├─ Initialize TelegramTradingBot                                           │
+│      ├─ Setup bot commands (/start, /buy, /sell, etc.)                         │
+│      ├─ Start TP/SL Price Monitor                                               │
+│      └─ Start polling (drop_pending_updates=True)                               │
+│                                                                                  │
+│  ✅  COMPLETE: "24/7 Server startup complete!"                                 │
+│                                                                                  │
+│  ⏱️  Total startup time: ~60-100 seconds (normal)                              │
+│  ⏱️  First time (with backfill): 15-20 minutes                                  │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🗄️  DATABASE LAYER (PostgreSQL on Railway)                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  CONNECTION CONFIGURATION                                                       │
+│  ├─ DATABASE_URL: postgresql://postgres:***@mainline.proxy.rlwy.net:13288/... │
+│  ├─ Pool Size: 10 connections                                                   │
+│  ├─ Max Overflow: 20 connections                                                │
+│  └─ Pool Pre-Ping: True (verify before use)                                     │
+│                                                                                  │
+│  🗂️  DATABASE MODELS (❌ PROBLEM #5: TWO SOURCES OF TRUTH)                      │
+│                                                                                  │
+│  ❌ database.py (root level)                                                     │
+│  ├─ User (users table) - with AES-256-GCM encrypted private keys               │
+│  ├─ TPSLOrder (tpsl_orders table)                                               │
+│  ├─ Transaction (transactions table)                                            │
+│  ├─ Withdrawal (withdrawals table)                                              │
+│  └─ Engine #1 (separate SQLAlchemy engine)                                      │
+│                                                                                  │
+│  ✅ core/persistence/models.py (better structure)                               │
+│  ├─ Market (markets table) - 40+ columns for Polymarket data                   │
+│  ├─ db_config.py defines Engine #2                                              │
+│  └─ Engine #2 (separate SQLAlchemy engine) ← DUPLICATE!                         │
+│                                                                                  │
+│  ⚠️ ISSUE: Two separate SQLAlchemy engines                                      │
+│     ├─ Duplicate connection pooling                                             │
+│     ├─ Potential transaction isolation issues                                   │
+│     ├─ Hard to maintain consistency                                             │
+│     └─ ❌ main.py:156 tries to import Market from wrong module!                │
+│                                                                                  │
+│  📊 TABLES CREATED (19+ migrations)                                             │
+│  ├─ markets (40+ columns)                                                       │
+│  ├─ users                                                                        │
+│  ├─ transactions                                                                │
+│  ├─ tpsl_orders                                                                 │
+│  ├─ withdrawals                                                                 │
+│  ├─ smart_wallets                                                               │
+│  ├─ smart_wallet_trades                                                         │
+│  ├─ fees, referrals, referral_commissions                                       │
+│  └─ ... + other tables                                                          │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🔧 CONFIGURATION LAYER (❌ PROBLEM #6: HYBRID IMPORTS)                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ❌ Hybrid Import Pattern (Split across 2 files)                                │
+│                                                                                  │
+│  config.py (root level)                      config/config.py (subdir)         │
+│  ├─ GAMMA_API_URL                            ├─ AUTO_APPROVAL_ENABLED          │
+│  ├─ CLOB_API_URL                             ├─ WALLET_CHECK_INTERVAL_SECONDS  │
+│  ├─ BOT_TOKEN                                ├─ REDIS_URL                       │
+│  └─ MARKET_UPDATE_INTERVAL                   ├─ PRICE_UPDATE_INTERVAL          │
+│                                              └─ ... + 30+ other vars           │
+│                                                                                  │
+│  main.py:32-33 imports BOTH:                                                    │
+│  from config import GAMMA_API_URL, ...                                          │
+│  from config.config import AUTO_APPROVAL_ENABLED, ...                           │
+│                                                                                  │
+│  ⚠️ ISSUES:                                                                     │
+│  ├─ Confusing for developers                                                    │
+│  ├─ Risk of missed imports                                                      │
+│  ├─ Environment variable duplication                                            │
+│  └─ .env.example missing = configuration undocumented                          │
+│                                                                                  │
+│  ✅ FIX: Consolidate into single config.py                                     │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🎯 SERVICES LAYER (18 services - core/services/)                               │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  📊 MARKET SERVICES                                                              │
+│  ├─ market_updater_service.py       - Fetches from Gamma API (5min + 1hr)      │
+│  ├─ market_fetcher_service.py       - Raw API fetch                            │
+│  ├─ market_categorizer_service.py   - AI categorization (OpenAI)               │
+│  ├─ market_grouping_service.py      - Groups by event                          │
+│  └─ market_group_cache.py           - Redis cache for groups                   │
+│                                                                                  │
+│  💰 PRICE & TRADING SERVICES                                                    │
+│  ├─ redis_price_cache.py            - Hot prices (60 sec refresh)              │
+│  ├─ price_updater_service.py        - Updates price cache                      │
+│  └─ balance_checker.py              - User balance checking                    │
+│                                                                                  │
+│  👤 USER & SECURITY SERVICES                                                    │
+│  ├─ user_service.py                 - User management                          │
+│  ├─ encryption_service.py           - AES-256-GCM key encryption              │
+│  ├─ api_key_manager.py              - API key generation                       │
+│  ├─ auto_approval_service.py        - Wallet auto-funding                      │
+│  └─ approval_manager.py             - Contract approvals (USDC, POL)          │
+│                                                                                  │
+│  🤖 BOT SERVICES                                                                │
+│  ├─ smart_wallet_monitor_service.py - Trades monitoring (every 10 min)        │
+│  ├─ twitter_bot_service.py          - Tweets smart wallet trades              │
+│  └─ notification_service.py         - User notifications                       │
+│                                                                                  │
+│  🛠️ UTILITY SERVICES                                                             │
+│  ├─ user_states.py                  - FSM for user dialogs                     │
+│  └─ (others)                                                                    │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🤖 TELEGRAM BOT LAYER (43 files - telegram_bot/)                               │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  HANDLERS (User interactions)                                                   │
+│  ├─ /start, /help              - Onboarding                                     │
+│  ├─ /buy, /sell                - Trading                                        │
+│  ├─ /balance, /positions        - Account info                                  │
+│  ├─ /pnl                        - P&L calculation                               │
+│  ├─ /tpsl                       - Take Profit / Stop Loss                       │
+│  ├─ /search {query}             - Market search                                │
+│  ├─ /settings                   - User preferences                             │
+│  └─ ... + inline buttons        - Quick actions                                │
+│                                                                                  │
+│  CORE FEATURES                                                                  │
+│  ├─ Wallet generation (auto-generated per user)                                │
+│  ├─ Order placement (USDC on Polymarket)                                       │
+│  ├─ Position tracking                                                          │
+│  ├─ TP/SL monitoring (every 10 seconds)                                        │
+│  ├─ Price alerts                                                               │
+│  └─ Referral system                                                            │
+│                                                                                  │
+│  PRICE MONITOR (TPSLPrice Monitor)                                             │
+│  ├─ Checks active TP/SL orders (every 10 seconds)                             │
+│  ├─ Executes triggered orders                                                  │
+│  └─ Sends notifications to users                                               │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  📦 DEPENDENCIES (52 total - ❌ PROBLEM #3: DUPLICATES FOUND)                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  DUPLICATES FOUND:                                                              │
+│  ├─ sqlalchemy>=2.0.0         listed TWICE (line 7 + 38)                        │
+│  └─ psycopg2-binary>=2.9.0    listed TWICE (line 8 + 37)                        │
+│                                                                                  │
+│  CORE DEPENDENCIES                                                              │
+│  ├─ fastapi>=0.104.0           - Web framework                                  │
+│  ├─ uvicorn[standard]>=0.24.0  - ASGI server                                   │
+│  ├─ python-telegram-bot>=20.0  - Bot framework                                  │
+│  └─ apscheduler>=3.10.0        - Job scheduler                                  │
+│                                                                                  │
+│  DATABASE                                                                       │
+│  ├─ sqlalchemy>=2.0.0           - ORM                                           │
+│  ├─ psycopg2-binary>=2.9.0      - PostgreSQL driver                             │
+│  └─ alembic>=1.12.0             - Migrations                                    │
+│                                                                                  │
+│  BLOCKCHAIN (HEAVY)                                                             │
+│  ├─ web3>=6.0.0                 - Ethereum/Polygon                             │
+│  ├─ eth-account>=0.8.0          - Account management                           │
+│  ├─ py-clob-client>=0.1.0       - Polymarket API wrapper                       │
+│  ├─ solana>=0.30.0              - Solana blockchain                            │
+│  ├─ solders>=0.18.0             - Solana types                                  │
+│  └─ ... + 10+ more              - Bridge, crypto, keys                          │
+│                                                                                  │
+│  CACHING & PERFORMANCE                                                          │
+│  ├─ redis>=5.0.0                - Price cache                                   │
+│  └─ cryptography>=3.4.0         - AES-256-GCM encryption                       │
+│                                                                                  │
+│  AI/ML                                                                          │
+│  └─ openai>=1.0.0               - Market categorization                         │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  ⚡ DATA FLOW: Buy Order Example                                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  User /buy YES $50                                                              │
+│    ↓                                                                             │
+│  [Telegram Handler] buy_handler()                                               │
+│    ↓                                                                             │
+│  [Trading Logic]                                                                │
+│  ├─ Get market via API (gamma-api.polymarket.com)                              │
+│  ├─ Get current prices (Redis cache)                                           │
+│  ├─ Get user wallet from database                                              │
+│  ├─ Create OrderArgs (Polymarket format)                                        │
+│  └─ Sign with user's private key (AES-256 decrypted)                           │
+│    ↓                                                                             │
+│  [Submit Order]                                                                 │
+│  ├─ POST to Polymarket CLOB API                                                │
+│  ├─ Wait for confirmation                                                      │
+│  └─ Store transaction in database                                              │
+│    ↓                                                                             │
+│  [TP/SL Monitor]                                                                │
+│  ├─ Record entry price                                                         │
+│  ├─ Watch prices every 10 seconds                                              │
+│  ├─ If price hits TP → SELL automatically                                      │
+│  └─ If price hits SL → SELL automatically                                      │
+│    ↓                                                                             │
+│  [Notifications]                                                                │
+│  ├─ Send to Telegram chat                                                      │
+│  └─ If enabled: Tweet to Twitter                                               │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+📋 SUMMARY OF ISSUES FOUND
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🔴 CRITICAL ISSUES (3)                                                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  #2  Railway readiness probe timeout too short                  ← FIX ASAP      │
+│  #5  Database models scattered (2 sources of truth)             ← FIX ASAP      │
+│  #1  Migration runner imports failing                           ← FIX ASAP      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  🟡 HIGH PRIORITY ISSUES (7)                                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  #3  Dependencies duplicated in requirements.txt                 ← Today        │
+│  #4  Migration file paths inconsistent                          ← Today        │
+│  #6  Config split across 2 files (hybrid imports)               ← Today        │
+│  #7  Migrations run synchronously (block healthcheck)           ← This week    │
+│  #8  Wrong import for Market model                              ← Today        │
+│  #9  Multiple entry points (confusing but harmless)             ← Low priority │
+│  #10 Environment variables not documented (.env.example missing)│ ← This week   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════════
+                              Audit Complete! ✅
+═══════════════════════════════════════════════════════════════════════════════════

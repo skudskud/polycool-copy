@@ -1,0 +1,212 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# Database files (local development)
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes (local)
+postgres_data/
+redis_data/
+pgadmin_data/
+
+# Local development files
+.env.local
+.env.development
+.env.production
+
+# Secrets and keys
+secrets/
+keys/
+*.key
+*.pem
+*.crt
+
+# Wallet backups (contains private keys)
+user_wallets_backup_*.json
+wallet_backup_*.json
+
+# Backup files
+*.bak
+*.backup
+
+# Test artifacts
+.coverage
+htmlcov/
+test-results/
+test-reports/
+
+# Cache directories
+.cache/
+__pycache__/
+*.pyc
+
+# Node modules (if any frontend is added)
+node_modules/
+
+# Railway specific
+.railway/
+
+# Sentry
+.sentryclirc
+
+# Local testing process IDs
+logs/*.pid
+
+# Git lock files and temporary files
+.git/index.lock
+.git/*.lock
+*.lock
+
+# Process files
+*.pid
+
+# Cursor/VSCode temporary files
+.cursor/
+.vscode/settings.json
+*.code-workspace
+
+# Python cache (ensure all are ignored)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+
+# macOS files (ensure all are ignored)
+**/.DS_Store
+**/._*
+.Spotlight-V100
+.Trashes

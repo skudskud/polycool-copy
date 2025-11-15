@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_1fe832d57fa601246a89ec467c89b9e3b1180dcf"
+      ],
+      "env": {
+        "SUPABASE_DEFAULT_PROJECT_ID": "fkksycggxaaohlfdwfle"
+      }
+    },
+    "Railway": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@railway/mcp-server"
+      ],
+      "env": {
+        "RAILWAY_TOKEN": "6f35ca25-a799-4328-af05-838bd8d9e708"
+      }
+    },
+    "Convex": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "convex@latest",
+        "mcp",
+        "start"
+      ],
+      "env": {}
+    }
+  }
+}

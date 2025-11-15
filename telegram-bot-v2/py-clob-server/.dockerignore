@@ -1,0 +1,58 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Archive folders (not needed in production)
+archive_*/
+ARCHIVE_*/
+
+# Tests
+tests/
+test_*/
+*_test.py
+
+# Documentation
+*.md
+!README.md
+
+# Development tools
+tools/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Migration scripts (SQL already in migrations/)
+run_migration.py
+run_withdrawal_migration.py
+
+# Temporary files
+*.tmp
+*.temp
+
+
+
+
+
+

@@ -1,0 +1,28 @@
+# Telegram Trading Bot Requirements
+
+# Core dependencies (already installed)
+py-clob-client>=0.1.0
+web3>=6.0.0
+eth-account>=0.8.0
+eth-keys>=0.4.0
+requests>=2.28.0
+
+# V2 Auto-approval dependencies
+cryptography>=3.4.0
+
+# Trading bot dependencies
+schedule>=1.2.0
+python-dotenv>=1.0.0
+
+# Telegram bot dependencies
+python-telegram-bot>=20.0
+asyncio-mqtt>=0.11.0
+
+# Optional for PostgreSQL database (future upgrade)
+# psycopg2-binary>=2.9.0
+# sqlalchemy>=2.0.0
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=5.0.0

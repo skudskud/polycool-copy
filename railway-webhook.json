@@ -1,0 +1,13 @@
+{
+  "name": "Webhook",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfile": "apps/subsquid-silo-tests/Dockerfile",
+    "context": "apps/subsquid-silo-tests"
+  },
+  "deploy": {
+    "startCommand": "python -m src.wh.webhook_worker",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

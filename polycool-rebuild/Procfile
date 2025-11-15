@@ -1,0 +1,10 @@
+# Railway Procfile - defines start commands for services
+# This file is NOT used by default, Railway uses railway.json
+
+# Each service should use its own railway.json:
+# - polycool-api: railway.json (python api_only.py)
+# - polycool-bot: railway.bot.json (python bot_only.py)
+# - polycool-workers: railway.workers.json (python workers.py)
+
+# If Railway ignores the .json files, manually configure in dashboard:
+# Settings → Deploy → Start Command

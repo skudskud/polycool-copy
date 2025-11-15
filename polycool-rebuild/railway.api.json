@@ -1,0 +1,20 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "python api_only.py",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10,
+    "healthcheckPath": "/health/live",
+    "readinessProbe": {
+      "path": "/health/ready",
+      "port": "$PORT",
+      "initialDelaySeconds": 20,
+      "timeoutSeconds": 5,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "failureThreshold": 3
+    }
+  }
+}

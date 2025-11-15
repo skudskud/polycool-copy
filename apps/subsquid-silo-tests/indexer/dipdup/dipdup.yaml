@@ -1,0 +1,74 @@
+# DipDup Configuration for PolyMarket Conditional Tokens On-Chain Indexing
+# Platform: Polygon
+# Target: Conditional Tokens (fills, user transactions)
+# Tables: subsquid_fills_onchain, subsquid_user_transactions
+#
+# Strategy: Track BUY (from 0x0) and SELL (transfers) - ignore burns
+# Price enrichment: Option C (background job every 60s)
+# Start block: ~2 days ago (covers recent trades + state)
+
+spec_version: "1.2"
+
+package: "handlers"
+
+database:
+  kind: "postgres"
+  host: "${DATABASE_HOST:localhost}"
+  port: "${DATABASE_PORT:5432}"
+  user: "${DATABASE_USER:postgres}"
+  password: "${DATABASE_PASSWORD:postgres}"
+  database: "${DATABASE_NAME:subsquid}"
+
+datasources:
+  polygon_rpc:
+    kind: "evm"
+    # Using Alchemy RPC (better rate limits than public)
+    # Set POLYGON_RPC_URL in .env if custom URL needed
+    url: "${POLYGON_RPC_URL:https://polygon-mainnet.g.alchemy.com/v2/demo}"
+    batch_size: 100
+
+contracts:
+  conditional_tokens:
+    address: "0xd5524179cb7ae012f5b642c1d6d700a289d07fb3"  # CT on Polygon
+    abi: "conditional_tokens"
+    events:
+      - Transfer
+      - TransferBatch
+      - PayoutRedeemed
+
+indexes:
+  fills_index:
+    kind: "evm"
+    datasource: "polygon_rpc"
+    contracts:
+      - conditional_tokens
+    # Start from ~48 hours ago (recency + historical context)
+    # DipDup will calculate start_block based on current time
+    start_block: 0  # Will use default (latest)
+    handlers:
+      - handler: on_transfer
+        filter:
+          topics:
+            - "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+      - handler: on_transfer_batch
+        filter:
+          topics:
+            - "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595a27a15c63f25be63f"
+      - handler: on_payout_redeemed
+        filter:
+          topics:
+            - "0x54e40e224d981f6d36d1e0487cdb6be1a2956cde52874f192993e959c02f2a56"
+
+handlers:
+  on_transfer: "handlers.transfers:on_transfer"
+  on_transfer_batch: "handlers.transfers:on_transfer_batch"
+  on_payout_redeemed: "handlers.payouts:on_payout_redeemed"
+
+database_schema: "subsquid"
+models_dir: "models"
+handlers_dir: "handlers"
+
+# Advanced settings
+log_level: "info"
+http_timeout: 60
+replay_enabled: true

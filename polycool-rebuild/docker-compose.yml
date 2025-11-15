@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: polycool-postgres
+    environment:
+      POSTGRES_DB: polycool_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres2025
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/dev/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d polycool_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - polycool-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: polycool-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./infrastructure/config/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - polycool-network
+
+  # Redis Commander (GUI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: polycool-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - polycool-network
+
+  # pgAdmin (Database GUI)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: polycool-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@polycool.com
+      PGADMIN_DEFAULT_PASSWORD: polycool2025
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - polycool-network
+
+  # Test Database (separate from dev)
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: polycool-postgres-test
+    environment:
+      POSTGRES_DB: polycool_test
+      POSTGRES_USER: polycool_test
+      POSTGRES_PASSWORD: polycool2025test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    profiles:
+      - test
+    networks:
+      - polycool-network
+
+volumes:
+  postgres_data:
+  postgres_test_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  polycool-network:
+    driver: bridge

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "name": "DipDup Indexer",
+  "description": "On-chain indexer for Conditional Tokens using DipDup on Polygon",
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "environment": [
+    {
+      "name": "DATABASE_HOST",
+      "description": "Supabase database host",
+      "value": ""
+    },
+    {
+      "name": "DATABASE_PORT",
+      "value": "5432"
+    },
+    {
+      "name": "DATABASE_USER",
+      "value": ""
+    },
+    {
+      "name": "DATABASE_PASSWORD",
+      "value": ""
+    },
+    {
+      "name": "DATABASE_NAME",
+      "value": "postgres"
+    },
+    {
+      "name": "POLYGON_RPC_URL",
+      "value": "https://polygon-mainnet.g.alchemy.com/v2/demo"
+    }
+  ]
+}

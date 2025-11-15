@@ -1,0 +1,27 @@
+type UserTransaction @entity {
+  id: ID!
+  txId: String! @index
+  userAddress: String! @index
+  positionId: String
+  marketId: String @index
+  outcome: Int
+  txType: String!
+  amount: String!
+  price: BigDecimal
+  amountInUsdc: BigDecimal
+  txHash: String!
+  blockNumber: BigInt!
+  timestamp: DateTime!
+}
+
+type ExternalLeader @entity {
+  id: ID!
+  virtualId: BigInt! @index
+  polygonAddress: String! @index
+  lastTradeId: String
+  tradeCount: Int!
+  isActive: Boolean! @index
+  lastPollAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}

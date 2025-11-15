@@ -1,0 +1,120 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polycool-rebuild"
+version = "0.1.0"
+description = "Telegram bot for Polymarket trading - Complete rebuild"
+authors = [{name = "Polycool Team", email = "dev@polycool.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    # Web Framework
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+
+    # Database
+    "sqlalchemy==2.0.23",
+    "psycopg==3.1.18",  # Async PostgreSQL driver
+    "alembic==1.12.1",
+
+    # Redis & Caching
+    "redis>=4.0.0,<6.0.0",
+
+    # HTTP Client
+    "httpx==0.25.2",
+    "aiohttp==3.9.1",
+
+    # Telegram Bot
+    "python-telegram-bot==20.7",
+
+    # Web3 & Blockchain
+    "web3==6.11.1",
+    "eth-account==0.9.0",
+    "solders>=0.20.0,<0.30.0",  # Solana (compatible Python 3.11)
+    "base58==2.1.1",
+
+    # Cryptography
+    "cryptography==41.0.7",
+    "pycryptodome==3.19.0",
+
+    # Data Processing
+    "pydantic==2.5.0",
+    "pydantic-settings==2.1.0",
+
+    # Monitoring & Logging
+    "structlog==23.2.0",
+    "sentry-sdk==1.37.1",
+
+    # Development
+    "pytest==7.4.3",
+    "pytest-asyncio==0.21.1",
+    "pytest-cov==4.1.0",
+    "faker==20.1.0",
+    "factory-boy==3.3.0",
+
+    # Utilities
+    "python-dotenv==1.0.0",
+    "click==8.1.7",
+    "tenacity==8.2.3",
+    "schedule==1.2.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==23.11.0",
+    "isort==5.12.0",
+    "flake8==6.1.0",
+    "mypy==1.7.1",
+    "pre-commit==3.5.0",
+]
+docs = [
+    "mkdocs==1.5.3",
+    "mkdocs-material==9.4.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["telegram_bot*", "core*", "data_ingestion*", "infrastructure*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=telegram_bot",
+    "--cov=core",
+    "--cov=data_ingestion",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-fail-under=70",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "slow: Slow running tests",
+]
+
+[tool.coverage.run]
+source = ["telegram_bot", "core", "data_ingestion"]
+omit = ["*/tests/*", "*/test_*.py"]
