@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     database_url: str = os.getenv("DATABASE_URL", "")
     
     # Service Configuration
-    alert_webhook_port: int = int(os.getenv("ALERT_WEBHOOK_PORT", "8000"))
+    # Railway sets $PORT automatically - use it if available, otherwise fallback to 8000
+    alert_webhook_port: int = int(os.getenv("PORT", os.getenv("ALERT_WEBHOOK_PORT", "8000")))
     poll_interval_seconds: int = int(os.getenv("POLL_INTERVAL_SECONDS", "60"))
     
     # Rate Limiting

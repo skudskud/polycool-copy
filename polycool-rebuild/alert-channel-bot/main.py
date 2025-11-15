@@ -88,7 +88,9 @@ async def root():
 
 
 if __name__ == "__main__":
-    port = int(settings.alert_webhook_port)
+    import os
+    # Railway sets PORT environment variable automatically
+    port = int(os.getenv("PORT", settings.alert_webhook_port))
     logger.info(f"🌐 Starting server on port {port}...")
     uvicorn.run(
         "main:app",
