@@ -90,6 +90,16 @@ async def receive_trade_notification(
                 trade_id=trade_id
             )
         
+        # Filter: Skip trades with price too high (low profit margin)
+        trade_price = payload.price
+        if trade_price is not None and trade_price >= settings.max_price:
+            logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (price: ${trade_price:.2f} >= ${settings.max_price:.2f})")
+            return WebhookResponse(
+                status="ignored",
+                message=f"Trade filtered (price ${trade_price:.2f} above maximum ${settings.max_price:.2f})",
+                trade_id=trade_id
+            )
+        
         # Check if already sent (deduplication)
         if await check_trade_sent(trade_id):
             logger.debug(f"⏭️ Trade {trade_id[:20]}... already sent, skipping")

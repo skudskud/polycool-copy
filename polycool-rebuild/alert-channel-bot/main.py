@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"   - Min Trade Value: ${settings.min_trade_value}")
     logger.info(f"   - Min Win Rate: {settings.min_win_rate * 100}%")
     logger.info(f"   - Min Smart Score: {settings.min_smart_score}")
+    logger.info(f"   - Max Price: ${settings.max_price}")
     logger.info(f"   - Max Age: {settings.max_age_minutes} minutes")
     
     # Start poller (fallback mechanism)

@@ -83,6 +83,12 @@ class TradePoller:
                         logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (smart_score: {smart_score} < {settings.min_smart_score})")
                         continue
                     
+                    # Filter: Skip trades with price too high (low profit margin)
+                    trade_price = trade.get('price')
+                    if trade_price is not None and trade_price >= settings.max_price:
+                        logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (price: ${trade_price:.2f} >= ${settings.max_price:.2f})")
+                        continue
+                    
                     # Filter: Skip trades with unknown outcome or missing market title
                     if trade.get('outcome') == 'UNKNOWN' or not trade.get('market_title'):
                         logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (outcome: {trade.get('outcome')}, market: {trade.get('market_title')})")

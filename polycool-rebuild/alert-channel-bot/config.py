@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     min_trade_value: float = float(os.getenv("MIN_TRADE_VALUE", "1000.0"))
     min_win_rate: float = float(os.getenv("MIN_WIN_RATE", "0.55"))
     min_smart_score: float = float(os.getenv("MIN_SMART_SCORE", "4.0"))
+    max_price: float = float(os.getenv("MAX_PRICE", "0.98"))
     max_age_minutes: int = int(os.getenv("MAX_AGE_MINUTES", "5"))
     
     # Logging
