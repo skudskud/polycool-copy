@@ -77,6 +77,12 @@ class TradePoller:
                         logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (value: ${trade_value:.2f} < ${settings.min_trade_value:.2f})")
                         continue
                     
+                    # Filter: Skip trades below minimum smart score (double-check)
+                    smart_score = trade.get('risk_score')  # risk_score is smart_score
+                    if smart_score is None or smart_score < settings.min_smart_score:
+                        logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (smart_score: {smart_score} < {settings.min_smart_score})")
+                        continue
+                    
                     # Filter: Skip trades with unknown outcome or missing market title
                     if trade.get('outcome') == 'UNKNOWN' or not trade.get('market_title'):
                         logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (outcome: {trade.get('outcome')}, market: {trade.get('market_title')})")

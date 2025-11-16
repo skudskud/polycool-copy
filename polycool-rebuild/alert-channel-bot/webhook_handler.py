@@ -80,6 +80,16 @@ async def receive_trade_notification(
                 trade_id=trade_id
             )
         
+        # Filter: Skip trades below minimum smart score
+        smart_score = payload.risk_score  # risk_score is smart_score
+        if smart_score is None or smart_score < settings.min_smart_score:
+            logger.debug(f"⏭️ Trade {trade_id[:20]}... filtered (smart_score: {smart_score} < {settings.min_smart_score})")
+            return WebhookResponse(
+                status="ignored",
+                message=f"Trade filtered (smart_score {smart_score} below minimum {settings.min_smart_score})",
+                trade_id=trade_id
+            )
+        
         # Check if already sent (deduplication)
         if await check_trade_sent(trade_id):
             logger.debug(f"⏭️ Trade {trade_id[:20]}... already sent, skipping")

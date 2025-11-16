@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     # Filtering Criteria (same as /smart_trading)
     min_trade_value: float = float(os.getenv("MIN_TRADE_VALUE", "1000.0"))
     min_win_rate: float = float(os.getenv("MIN_WIN_RATE", "0.55"))
+    min_smart_score: float = float(os.getenv("MIN_SMART_SCORE", "5.0"))
     max_age_minutes: int = int(os.getenv("MAX_AGE_MINUTES", "5"))
     
     # Logging

@@ -206,7 +206,7 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
             cutoff_time_naive = cutoff_time.replace(tzinfo=None)
             
             # Log the filter value being used for debugging
-            logger.info(f"🔍 Querying trades with min_trade_value=${settings.min_trade_value:.2f}, min_win_rate={settings.min_win_rate:.2f}")
+            logger.info(f"🔍 Querying trades with min_trade_value=${settings.min_trade_value:.2f}, min_win_rate={settings.min_win_rate:.2f}, min_smart_score={settings.min_smart_score:.2f}")
             
             result = await session.execute(
                 text("""
@@ -232,6 +232,7 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                         wa.address_type = 'smart_wallet'
                         AND wa.is_active = true
                         AND wa.win_rate >= :min_win_rate
+                        AND wa.risk_score >= :min_smart_score
                         AND t.trade_type = 'buy'
                         AND t.timestamp >= :cutoff_time
                         AND t.amount_usdc >= :min_trade_value
@@ -244,6 +245,7 @@ async def get_recent_qualified_trades(max_age_minutes: int = 5) -> List[Dict[str
                 """),
                 {
                     "min_win_rate": settings.min_win_rate,
+                    "min_smart_score": settings.min_smart_score,
                     "cutoff_time": cutoff_time_naive,
                     "min_trade_value": settings.min_trade_value
                 }
