@@ -227,7 +227,10 @@ def format_alert_message(trade_data: Dict[str, Any]) -> str:
         message_parts.append(f"📈 Side: {side} {outcome}\n\n")
         
         # Confidence score
-        message_parts.append(f"🎯 Confidence Score: {confidence_visual} {confidence_score}/10")
+        message_parts.append(f"🎯 Confidence Score: {confidence_visual} {confidence_score}/10\n\n")
+        
+        # Bot link
+        message_parts.append("🤖 Copy Trading Bot: https://t.me/polycoolbot")
         
         message = "".join(message_parts)
         
